@@ -1,12 +1,14 @@
 import { ReactNode } from "react";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
 
 const ClientLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <div>
-      {/* Header */}
-      <main>{children}</main>
-      {/* Footer */}
-    </div>
+    <>
+      <Header />
+      <main className="min-h-screen">{children}</main>
+      <Footer />
+    </>
   );
 };
 
