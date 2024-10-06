@@ -94,7 +94,7 @@ const Footer = () => {
             Đừng bỏ lỡ tin tức quang trọng!
           </h4>
           <div className="flex gap-3 items-center mt-2">
-            <p className="max-w-52">
+            <p className="max-w-48">
               Nhận tóm tắt tin tức nổi bật, hấp dẫn nhất 24 giờ qua trên
               VnExpress.
             </p>
