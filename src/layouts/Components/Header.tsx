@@ -27,7 +27,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="border-b sticky top-0 bg-white">
+    <header className="border-b sticky top-0 bg-white z-50">
       <div className="flex justify-between h-[50px] items-center max-w-5xl mx-auto px-5">
         <div className="flex items-center gap-4">
           <div className="lg:hidden block">
