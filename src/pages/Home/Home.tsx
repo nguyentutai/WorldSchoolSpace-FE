@@ -3,7 +3,45 @@ import { Link } from "react-router-dom";
 import { blogList } from "../../constants/common";
 import NewBlog from "../../components/shared/NewBlog";
 import NewBlog2 from "../../components/shared/NewBlog2";
+import { useState, useEffect } from "react";
+import { axiosInstance } from "../../config/axiosConfig";
+import { Post } from "../../components/interfaces/post";
 const Home = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<null | Error>(null);
+
+  // Hàm để thêm URL đầy đủ cho đường dẫn ảnh
+  const getFullImagePath = (image: string) => {
+    // Kiểm tra xem ảnh có bắt đầu bằng http hay không
+    if (!image.startsWith("http")) {
+      return `http://127.0.0.1:8000/storage/${image}`; // Thêm đường dẫn cho ảnh
+    }
+    return image;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get("/post");
+        console.log(response.data); // Kiểm tra cấu trúc dữ liệu
+        setPosts(response.data.data); // Lưu dữ liệu bài viết từ response
+      } catch (error) {
+        setError(error as Error);
+        setPosts([]); // Đảm bảo posts là một mảng
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  console.log(posts); // Kiểm tra trạng thái posts
+
   return (
     <div className="max-w-5xl mx-auto md:px-0 px-5">
       <div className="py-5 grid grid-cols-12 gap-5">
@@ -40,38 +78,26 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="border-t mt-6 pt-3 grid grid-cols-12 gap-5">
-            <div className="flex-col flex gap-4 md:col-span-4 col-span-12 justify-between">
-              <Link to={""} className="text-base font-semibold line-clamp-2">
-                Vùng cao Quảng Nam lo sạt lở
-              </Link>
-              <img
-                src="https://i1-vnexpress.vnecdn.net/2024/10/05/IMG7691-1728113899-1529-1728117303.jpg?w=300&h=180&q=100&dpr=1&fit=crop&s=19vdZvC1SjoqngAg17-PbA"
-                alt=""
-                className="w-fit"
-              />
+          {posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {posts.slice(0, 3).map((post) => (
+                <div
+                  key={post.id}
+                  className="border-t mt-6 pt-3 flex flex-col items-center"
+                >
+                  <Link
+                    to={""}
+                    className="text-base font-semibold line-clamp-2"
+                  >
+                    {post.title}
+                  </Link>
+                  <img src={getFullImagePath(post.image)} alt={post.title} />
+                </div>
+              ))}
             </div>
-            <div className="flex-col flex gap-4 md:col-span-4 col-span-12 justify-between">
-              <Link to={""} className="text-base font-semibold line-clamp-2">
-                Israel tiến thoái lưỡng nan trong cuộc chiến với Hezbollah
-              </Link>
-              <img
-                src="https://i1-vnexpress.vnecdn.net/2024/10/04/ap24277518475014-1728027291-3106-1728027602.jpg?w=300&h=180&q=100&dpr=1&fit=crop&s=6RTwXEpzi9hX6E2f3a4eHw"
-                alt=""
-                className="w-fit"
-              />
-            </div>
-            <div className="flex-col flex gap-4 md:col-span-4 col-span-12 justify-between">
-              <Link to={""} className="text-base font-semibold line-clamp-2">
-                Vùng cao Quảng Nam lo sạt lở
-              </Link>
-              <img
-                src="https://i1-vnexpress.vnecdn.net/2024/10/05/IMG7691-1728113899-1529-1728117303.jpg?w=300&h=180&q=100&dpr=1&fit=crop&s=19vdZvC1SjoqngAg17-PbA"
-                alt=""
-                className="w-fit"
-              />
-            </div>
-          </div>
+          ) : (
+            <div>No posts available.</div>
+          )}
         </div>
         <div className="col-span-3 md:block hidden">
           <img
