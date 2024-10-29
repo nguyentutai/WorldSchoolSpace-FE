@@ -12,9 +12,6 @@ import { GoReply } from "react-icons/go";
 const Blogs = () => {
   return (
     <>
-      <div className="bg-slate-600 text-white text-center p-5 mb-5">
-        Đây là header
-      </div>
       <div className="max-w-[1400px] bg-g mx-auto p-4">
         <div className="flex space-x-5">
           <div className="flex-1">
@@ -500,9 +497,6 @@ const Blogs = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="bg-slate-600 text-white text-center p-5 mt-5">
-        Đây là Footer
       </div>
     </>
   );
