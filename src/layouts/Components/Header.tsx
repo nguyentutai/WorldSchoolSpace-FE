@@ -1,31 +1,31 @@
 import { useEffect, useState } from "react";
-import { daysOfWeek } from "../../constants/common";
-import { Link } from "react-router-dom";
-import { IoHome, IoSearchOutline } from "react-icons/io5";
+import { Link, useNavigate } from "react-router-dom";
 import { HiMiniBars3, HiOutlineBell, HiUserPlus } from "react-icons/hi2";
-import { HiOutlineX } from "react-icons/hi";
 import config from "../../config";
-
+import { IoHome, IoSearchOutline } from "react-icons/io5";
+import { HiOutlineX } from "react-icons/hi";
 const Header = () => {
-  const [currentDate, setCurrentDate] = useState<string>("");
-  const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [toggleMenu, setToggleMenu] = useState<boolean>(false);
-
+  const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUserName(null);
+    navigate(config.routes.Signin);
+  };
   const handleToggleMenu = () => setToggleMenu(!toggleMenu);
-
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserName(user.name);
+    }
+  }, []);
   const handleIconClick = () => {
     setIsInputVisible(true);
   };
-  useEffect(() => {
-    const date = new Date();
-    const dayName = daysOfWeek[date.getDay()];
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const formattedDate = `${dayName}, ${day}/${month}/${year}`;
-    setCurrentDate(formattedDate);
-  }, []);
-
   return (
     <header className="border-b sticky top-0 bg-white z-50">
       <div className="flex justify-between h-[50px] items-center max-w-5xl mx-auto px-5">
@@ -49,9 +49,6 @@ const Header = () => {
               alt=""
             />
           </Link>
-          <div className="border-s px-3 lg:block hidden">
-            <span className="text-xs">{currentDate}</span>
-          </div>
         </div>
         <div>
           <nav>
@@ -84,14 +81,20 @@ const Header = () => {
                   />
                 </form>
               </li>
-              <li>
-                <Link
-                  to={config.routes.Signin}
-                  className="flex gap-1 border-s px-3"
-                >
-                  <HiUserPlus className="size-5" />
-                  <span className="hidden lg:block">Đăng nhập</span>
-                </Link>
+              <li className="flex items-center border-s px-3">
+                {userName ? (
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm">{userName}</span>
+                    <button onClick={handleLogout} className="text-red-600">
+                      Đăng xuất
+                    </button>
+                  </div>
+                ) : (
+                  <Link to={config.routes.Signin} className="flex gap-1">
+                    <HiUserPlus className="size-5" />
+                    <span className="hidden lg:block">Đăng nhập</span>
+                  </Link>
+                )}
               </li>
               <li className="ps-3 border-s">
                 <Link to={""}>
@@ -108,7 +111,7 @@ const Header = () => {
         } lg:translate-x-0`}
       >
         <nav className="lg:px-5 px-3 border-t lg:border-b py-3 *:text-sm">
-          <ul className="flex lg:flex-row flex-col lg:gap-5 gap-4 hover:*:text-red-700 *:duration-500 *:border-b *:lg:border-none *:px-4 *:lg:px-2 *:pb-3 *:lg:pb-0">
+          <ul className="flex lg:flex-row flex-col lg:gap-5 justify-center gap-4 hover:*:text-red-700 *:duration-500 *:border-b *:lg:border-none *:px-4 *:lg:px-2 *:pb-3 *:lg:pb-0">
             <li>
               <Link to={config.routes.home} className="flex gap-2 items-center">
                 <IoHome className="size-5" />

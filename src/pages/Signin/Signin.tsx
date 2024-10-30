@@ -16,17 +16,22 @@ const Signin = () => {
         password: values.password,
       });
 
-      const { token } = response.data;
-      localStorage.setItem("token", token); // Store token
-      message.success("Login successful!");
-      navigate("/home"); // Redirect to dashboard or any protected page
+      const { access_token, user } = response.data;
+
+      if (access_token) {
+        localStorage.setItem("token", access_token);
+        localStorage.setItem("user", JSON.stringify(user));
+        message.success("Login successful!");
+        navigate("/");
+      } else {
+        message.error("No token received. Please check your credentials.");
+      }
     } catch (error) {
       message.error("Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="container flex flex-col mx-auto mt-5 bg-white rounded-lg">
       <div className="flex justify-center w-full h-full my-auto lg:justify-normal draggable">
