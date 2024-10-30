@@ -36,7 +36,6 @@ const Home = () => {
 
     fetchData();
   }, []);
-
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
@@ -108,31 +107,36 @@ const Home = () => {
       </div>
       <div className="grid grid-cols-12 gap-4">
         <div className="md:col-span-5 col-span-12">
-          {posts.map((item) => (
-            <Link
-              to={`/posts/${item.slug}`}
-              key={item.id}
-              className="flex flex-col gap-2 border-b py-4"
-            >
-              <h2 className="md:text-lg text-sm font-semibold">{item.title}</h2>
-              <div className="flex gap-2">
-                <img
-                  src={getFullImagePath(item.image)}
-                  alt={item.title}
-                  className="max-w-36 w-full h-fit"
-                />
-                <div>
-                  <span className="md:text-sm text-xs">{item.excerpt}</span>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <FaMessage className="size-3" />
-                    <span className="text-xs">{item.views} views</span>{" "}
-                    {/* Display views count */}
+          {posts
+            .sort(() => Math.random() - 0.5) // Sắp xếp ngẫu nhiên
+            .map((item) => (
+              <Link
+                to={`/posts/${item.slug}`}
+                key={item.id}
+                className="flex flex-col gap-2 border-b py-4"
+              >
+                <h2 className="md:text-lg text-sm font-semibold">
+                  {item.title}
+                </h2>
+                <div className="flex gap-2">
+                  <img
+                    src={getFullImagePath(item.image)}
+                    alt={item.title}
+                    className="max-w-36 w-full h-fit"
+                  />
+                  <div>
+                    <span className="md:text-sm text-xs">{item.excerpt}</span>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <FaMessage className="size-3" />
+                      <span className="text-xs">{item.views} views</span>
+                      {/* Display views count */}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
+
         <div className="md:col-span-7 col-span-12">
           <NewBlog />
         </div>

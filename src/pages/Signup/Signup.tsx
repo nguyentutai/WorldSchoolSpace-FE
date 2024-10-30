@@ -6,7 +6,7 @@ import { axiosInstance } from "../../config/axiosConfig";
 const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [form] = Form.useForm(); // Khởi tạo form instance ở đây
+  const [form] = Form.useForm();
 
   const onFinish = async (values: any) => {
     setLoading(true);
@@ -32,7 +32,7 @@ const Signup = () => {
   return (
     <div className="container flex flex-col mx-auto mt-5 bg-white rounded-lg">
       <Form
-        form={form} // Truyền form instance vào đây
+        form={form}
         name="signup"
         layout="vertical"
         onFinish={onFinish}
