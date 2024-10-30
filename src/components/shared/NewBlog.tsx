@@ -1,29 +1,37 @@
-import { Link } from "react-router-dom";
+// CategoryList.js
+import React, { useEffect, useState } from "react";
+import { axiosInstance } from "../../config/axiosConfig";
 
 const NewBlog = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    axiosInstance
+      .get("/category")
+      .then((response) => {
+        setCategories(response.data);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the categories!", error);
+      });
+  }, []);
+
+  const renderCategories = (categories: any) => {
+    return categories.map((category: any) => (
+      <div key={category.id}>
+        <h3>{category.name}</h3>
+        {category.children && category.children.length > 0 && (
+          <div style={{ paddingLeft: "20px" }}>
+            {renderCategories(category.children)}
+          </div>
+        )}
+      </div>
+    ));
+  };
   return (
     <div className="p-4 border-b">
       <div className="flex gap-5 items-end border-b">
-        <h1 className="md:text-xl text-lg font-semibold text-gray-800 border-b border-red-800 whitespace-nowrap">
-          Bất động sản
-        </h1>
-        <div className="flex space-x-4 text-gray-600 md:*:text-sm *:text-xs whitespace-nowrap overflow-x-scroll scrollbar-hide">
-          <Link to={""} className="hover:text-black">
-            Chính sách
-          </Link>
-          <Link to={""} className="hover:text-black">
-            Thị trường
-          </Link>
-          <Link to={""} className="hover:text-black">
-            Dự án
-          </Link>
-          <Link to={""} className="hover:text-black">
-            Không gian sống
-          </Link>
-          <Link to={""} className="hover:text-black">
-            Tư vấn
-          </Link>
-        </div>
+        {renderCategories(categories)}
       </div>
 
       <div className="grid md:grid-cols-3 grid-cols-1 md:gap-0 gap-4 py-4">
