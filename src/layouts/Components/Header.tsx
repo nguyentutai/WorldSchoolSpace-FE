@@ -4,28 +4,48 @@ import { HiMiniBars3, HiOutlineBell, HiUserPlus } from "react-icons/hi2";
 import config from "../../config";
 import { IoHome, IoSearchOutline } from "react-icons/io5";
 import { HiOutlineX } from "react-icons/hi";
+import { axiosInstance } from "../../config/axiosConfig";
+import { Category } from "../../components/interfaces/category";
+
 const Header = () => {
   const [userName, setUserName] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [toggleMenu, setToggleMenu] = useState<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setUserName(null);
     navigate(config.routes.Signin);
   };
+
   const handleToggleMenu = () => setToggleMenu(!toggleMenu);
+  const handleIconClick = () => setIsInputVisible(true);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUserName(user.name);
     }
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get("/category");
+        const parentCategories = response.data.filter(
+          (category: any) => category.parent_id === 0 && category.is_active
+        );
+        setCategories(parentCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
   }, []);
-  const handleIconClick = () => {
-    setIsInputVisible(true);
-  };
+
   return (
     <header className="border-b sticky top-0 bg-white z-50">
       <div className="flex justify-between h-[50px] items-center max-w-5xl mx-auto px-5">
@@ -46,13 +66,13 @@ const Header = () => {
           <Link to={config.routes.home}>
             <img
               src="https://s1.vnecdn.net/vnexpress/restruct/i/v942/v2_2019/pc/graphics/logo.svg"
-              alt=""
+              alt="Logo"
             />
           </Link>
         </div>
         <div>
           <nav>
-            <ul className="flex *:text-sm *:font-normal items-center">
+            <ul className="flex items-center text-sm font-normal">
               <li className="border-e px-3">
                 <Link to={""}>Mới nhất</Link>
               </li>
@@ -60,7 +80,7 @@ const Header = () => {
                 <Link to={""}>Tin theo khu vực</Link>
               </li>
               <li className="flex gap-2 items-center border-e px-3">
-                <img src="../public/image/e.png" alt="" />
+                <img src="/public/image/e.png" alt="e" />
                 <Link to={""}>International</Link>
               </li>
               <li className="ps-3 pe-1">
@@ -118,33 +138,11 @@ const Header = () => {
                 <span className="lg:hidden block">Trang chủ</span>
               </Link>
             </li>
-            <li>
-              <Link to={""}>Thời sự</Link>
-            </li>
-            <li>
-              <Link to={""}>Góc nhìn</Link>
-            </li>
-            <li>
-              <Link to={""}>Thế giới</Link>
-            </li>
-            <li>
-              <Link to={""}>Video</Link>
-            </li>
-            <li>
-              <Link to={""}>Podcasts</Link>
-            </li>
-            <li>
-              <Link to={""}>Kinh doanh</Link>
-            </li>
-            <li>
-              <Link to={""}>Bất động sản</Link>
-            </li>
-            <li>
-              <Link to={""}>Khoa học</Link>
-            </li>
-            <li>
-              <Link to={""}>Giải trí</Link>
-            </li>
+            {categories.map((category) => (
+              <li key={category.user_id} className="border-e px-3">
+                <Link to={`/category/${category.slug}`}>{category.name}</Link>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>
