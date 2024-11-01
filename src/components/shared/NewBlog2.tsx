@@ -24,11 +24,8 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
         console.log("Danh mục:", response.data);
         setCategories(response.data);
 
-        // Xáo trộn danh mục và lấy 3 danh mục đầu tiên
-        const shuffledCategories = [...response.data].sort(
-          () => Math.random() - 0.5
-        );
-        setVisibleCategories(shuffledCategories.slice(0, 3));
+        // Lấy 3 danh mục đầu tiên từ kết quả trả về
+        setVisibleCategories(response.data.slice(0, 3));
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           setError(err.message);
@@ -54,7 +51,7 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
     const fetchPostsForCategories = async () => {
       try {
         const postsMap: { [key: string]: Post[] } = {};
-        for (const category of categories) {
+        for (const category of visibleCategories) {
           const response = await axiosInstance.get(
             `/categories/${category.id}/posts`
           );
@@ -76,10 +73,10 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
       }
     };
 
-    if (categories.length > 0) {
+    if (visibleCategories.length > 0) {
       fetchPostsForCategories();
     }
-  }, [categories]);
+  }, [visibleCategories]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -92,24 +89,25 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
           padding: 0,
           display: "flex",
           gap: "20px",
-          flexWrap: "wrap",
+          flexDirection: "row",
+          flexWrap: "nowrap",
         }}
       >
         {visibleCategories.map((cat) => {
-          // Kiểm tra nếu danh mục có bài viết
           const posts = postsByCategory[cat.id];
           if (!posts || posts.length === 0) {
-            return null; // Ẩn danh mục này nếu không có bài viết
+            return null;
           }
 
           return (
             <li
               key={cat.id}
               style={{
-                flex: "1 0 30%",
+                width: "330px",
                 border: "1px solid #ccc",
                 borderRadius: "5px",
                 padding: "10px",
+                boxSizing: "border-box",
               }}
             >
               <div className="flex gap-5 items-end border-b">
@@ -128,7 +126,6 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
               <div className="flex mb-4 mt-4">
                 {posts.length > 0 ? (
                   <div className="flex flex-col w-full">
-                    {/* Bài viết đầu tiên: Hiển thị ảnh, tên và tóm tắt */}
                     {posts[0].image && (
                       <div className="flex-col mb-4 w-full">
                         <img
@@ -136,7 +133,7 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
                           alt={posts[0].title}
                           className="w-full h-52 mb-2"
                         />
-                        <div className="flex-1 ml-4">
+                        <div className="flex-1 ml-2">
                           <h2 className="font-semibold text-base text-gray-800">
                             {posts[0].title}
                           </h2>
@@ -147,9 +144,8 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
                       </div>
                     )}
 
-                    {/* Bài viết thứ hai: Chỉ hiển thị tên và tóm tắt */}
                     {posts.length > 1 && (
-                      <div className="mt-4">
+                      <div className="mt-4 ml-2">
                         <h3 className="font-semibold text-base text-gray-800">
                           {posts[1].title}
                         </h3>

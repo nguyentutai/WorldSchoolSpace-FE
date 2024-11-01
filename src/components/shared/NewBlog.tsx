@@ -108,13 +108,13 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                     {posts.slice(0, 2).map((post, index) => (
                       <div
                         key={post.id}
-                        className={`flex ${index % 2 === 0 ? "pr-2" : "pl-1"}`}
+                        className={`flex ${index % 2 === 0 ? "pr-0" : "pl-0"}`}
                       >
                         {post.image && index % 2 === 0 && (
                           <img
                             src={getFullImagePath(post.image)}
                             alt={post.title}
-                            className="w-48 h-32 mb-2 p-4"
+                            className="w-56 h-44 mb-2 p-2"
                           />
                         )}
                         <div className="flex-1 w-44">
