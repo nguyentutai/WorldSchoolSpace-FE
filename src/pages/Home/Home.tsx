@@ -74,13 +74,13 @@ const Home = () => {
                   <img
                     src={getFullImagePath(item.image)}
                     alt={item.title}
-                    className="max-w-36 w-full h-fit"
+                    className="max-w-44 w-full h-fit"
                   />
                   <div>
                     <span className="md:text-sm text-xs">{item.excerpt}</span>
                     <div className="flex items-center gap-2 text-gray-400">
                       <FaMessage className="size-3" />
-                      <span className="text-xs">{item.views} views</span>
+                      <span className="text-xs">{item.views}</span>
                     </div>
                   </div>
                 </div>

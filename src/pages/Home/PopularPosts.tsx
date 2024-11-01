@@ -82,7 +82,7 @@ const PopularPosts = () => {
             <img
               src={getFullImagePath(post.image)}
               alt={post.title}
-              className="w-fit"
+              className="w-56 h-32"
             />
           </div>
         ))}
