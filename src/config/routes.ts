@@ -3,7 +3,8 @@ const routes = {
   Signin: "/Signin",
   Signup: "/Signup",
   Blogs: "/Blogs",
-  newBlog: "/news",
+  newBlog: "/news/:slug",
+  SubCategoryPage: "/categories/:slug",
   searchBlog: "/search",
 };
 

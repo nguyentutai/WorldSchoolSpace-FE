@@ -49,9 +49,9 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
         const postsMap: { [key: string]: Post[] } = {};
         for (const category of categories) {
           const response = await axiosInstance.get(
-            `/categories/${category.id}/posts`
+            `/category/${category.slug}/posts`
           );
-          postsMap[category.id] = response.data.posts.sort(
+          postsMap[category.slug] = response.data.posts.sort(
             () => Math.random() - 0.5
           );
         }
@@ -81,14 +81,13 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
     <div>
       <ul style={{ listStyleType: "none", padding: 0 }}>
         {categories.map((cat) => {
-          // Kiểm tra nếu danh mục có bài viết
-          const posts = postsByCategory[cat.id];
+          const posts = postsByCategory[cat.slug];
           if (!posts || posts.length === 0) {
-            return null; // Ẩn danh mục này nếu không có bài viết
+            return null;
           }
 
           return (
-            <li key={cat.id}>
+            <li key={cat.slug}>
               <div className="flex gap-5 items-end border-b">
                 <span className="md:text-xl text-lg font-semibold text-gray-800 border-b border-red-800 whitespace-nowrap">
                   {cat.name}
@@ -96,7 +95,7 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                 {cat.children && cat.children.length > 0 && (
                   <ul className="flex space-x-4 text-gray-600 md:text-sm text-xs whitespace-nowrap overflow-x-scroll scrollbar-hide">
                     {cat.children.map((child) => (
-                      <li key={child.id}>{child.name}</li>
+                      <li key={child.slug}>{child.name}</li>
                     ))}
                   </ul>
                 )}
