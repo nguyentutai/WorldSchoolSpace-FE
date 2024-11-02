@@ -3,6 +3,7 @@ import { Post } from "../interfaces/post";
 import { axiosInstance } from "../../config/axiosConfig";
 import { Category } from "../interfaces/category";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 interface NewBlog2Props {
   categoryId: string | null;
@@ -111,13 +112,18 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
               }}
             >
               <div className="flex gap-5 items-end border-b">
-                <span className="md:text-xl text-lg font-semibold text-gray-800 border-b border-red-800 whitespace-nowrap">
+                <Link
+                  to={`/news/${cat.slug}`}
+                  className="md:text-xl text-lg font-semibold text-gray-800 border-b border-red-800 whitespace-nowrap"
+                >
                   {cat.name}
-                </span>
+                </Link>
                 {cat.children && cat.children.length > 0 && (
                   <ul className="flex space-x-4 text-gray-600 md:text-sm text-xs whitespace-nowrap overflow-x-scroll scrollbar-hide">
                     {cat.children.map((child) => (
-                      <li key={child.slug}>{child.name}</li>
+                      <Link to={`/categories/${child.slug}`} key={child.slug}>
+                        {child.name}
+                      </Link>
                     ))}
                   </ul>
                 )}

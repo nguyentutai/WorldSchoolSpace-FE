@@ -13,7 +13,7 @@ const NewPage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [subPosts, setSubPosts] = useState<{ [key: string]: Post[] }>({}); 
+  const [subPosts, setSubPosts] = useState<{ [key: string]: Post[] }>({});
 
   useEffect(() => {
     const fetchCategoriesAndPosts = async () => {
@@ -57,7 +57,7 @@ const NewPage = () => {
     };
 
     fetchCategoriesAndPosts();
-  }, [slug]); 
+  }, [slug]);
 
   const handleError = (err: unknown) => {
     if (axios.isAxiosError(err)) setError(err.message);
@@ -129,37 +129,33 @@ const NewPage = () => {
 
             <div className="grid grid-cols-12 gap-4">
               <div className="md:col-span-5 col-span-12">
-                {posts.slice(0, 8).map(
-                  (
-                    item 
-                  ) => (
-                    <Link
-                      to={`/posts/${item.slug}`}
-                      key={item.id}
-                      className="flex flex-col gap-2 border-b py-4"
-                    >
-                      <h2 className="md:text-lg text-sm font-semibold">
-                        {item.title}
-                      </h2>
-                      <div className="flex gap-2">
-                        <img
-                          src={getFullImagePath(item.image)}
-                          alt={item.title}
-                          className="max-w-44 w-full h-fit"
-                        />
-                        <div>
-                          <span className="md:text-sm text-xs">
-                            {item.excerpt}
-                          </span>
-                          <div className="flex items-center gap-2 text-gray-400">
-                            <FaMessage className="size-3" />
-                            <span className="text-xs">{item.views}</span>
-                          </div>
+                {posts.slice(0, 8).map((item) => (
+                  <Link
+                    to={`/posts/${item.slug}`}
+                    key={item.id}
+                    className="flex flex-col gap-2 border-b py-4"
+                  >
+                    <h2 className="md:text-lg text-sm font-semibold">
+                      {item.title}
+                    </h2>
+                    <div className="flex gap-2">
+                      <img
+                        src={getFullImagePath(item.image)}
+                        alt={item.title}
+                        className="max-w-44 w-full h-fit"
+                      />
+                      <div>
+                        <span className="md:text-sm text-xs">
+                          {item.excerpt}
+                        </span>
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <FaMessage className="size-3" />
+                          <span className="text-xs">{item.views}</span>
                         </div>
                       </div>
-                    </Link>
-                  )
-                )}
+                    </div>
+                  </Link>
+                ))}
               </div>
 
               <div className="md:col-span-7 col-span-12">
