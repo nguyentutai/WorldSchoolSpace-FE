@@ -53,9 +53,9 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
         const postsMap: { [key: string]: Post[] } = {};
         for (const category of visibleCategories) {
           const response = await axiosInstance.get(
-            `/categories/${category.id}/posts`
+            `/category/${category.slug}/posts`
           );
-          postsMap[category.id] = response.data.posts.sort(
+          postsMap[category.slug] = response.data.posts.sort(
             () => Math.random() - 0.5
           );
         }
@@ -94,14 +94,14 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
         }}
       >
         {visibleCategories.map((cat) => {
-          const posts = postsByCategory[cat.id];
+          const posts = postsByCategory[cat.slug];
           if (!posts || posts.length === 0) {
             return null;
           }
 
           return (
             <li
-              key={cat.id}
+              key={cat.slug}
               style={{
                 width: "330px",
                 border: "1px solid #ccc",
@@ -117,7 +117,7 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
                 {cat.children && cat.children.length > 0 && (
                   <ul className="flex space-x-4 text-gray-600 md:text-sm text-xs whitespace-nowrap overflow-x-scroll scrollbar-hide">
                     {cat.children.map((child) => (
-                      <li key={child.id}>{child.name}</li>
+                      <li key={child.slug}>{child.name}</li>
                     ))}
                   </ul>
                 )}
@@ -125,7 +125,7 @@ const NewBlog2: React.FC<NewBlog2Props> = ({ categoryId }) => {
 
               <div className="flex mb-4 mt-4">
                 {posts.length > 0 ? (
-                  <div className="flex flex-col w-full">
+                  <div className="flex flex-col w-full ">
                     {posts[0].image && (
                       <div className="flex-col mb-4 w-full">
                         <img

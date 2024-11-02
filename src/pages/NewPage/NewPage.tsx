@@ -1,212 +1,237 @@
+import { useParams } from "react-router-dom";
 import { FaMessage } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import BlogActicle from "../../components/shared/BlogActicle";
+import React, { useEffect, useState } from "react";
+import { axiosInstance } from "../../config/axiosConfig";
+import { Category } from "../../components/interfaces/category";
+import { Post } from "../../components/interfaces/post";
+import axios from "axios";
 
 const NewPage = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [randomCategory, setRandomCategory] = useState<Category | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [subPosts, setSubPosts] = useState<{ [key: string]: Post[] }>({}); 
+
+  useEffect(() => {
+    const fetchCategoriesAndPosts = async () => {
+      try {
+        const categoriesResponse = await axiosInstance.get("/category");
+        const categories = categoriesResponse.data;
+        if (categories.length === 0) throw new Error("No categories found.");
+
+        const selectedCategory = categories.find(
+          (cat: Category) => cat.slug === slug
+        );
+
+        if (selectedCategory) {
+          setRandomCategory(selectedCategory);
+
+          const postsResponse = await axiosInstance.get(
+            `/category/${selectedCategory.slug}/posts`
+          );
+          setPosts(postsResponse.data.posts);
+
+          const subPostsData: { [key: string]: Post[] } = {};
+          if (selectedCategory.children) {
+            await Promise.all(
+              selectedCategory.children.map(async (child: any) => {
+                const childPostsResponse = await axiosInstance.get(
+                  `/category/${child.slug}/posts`
+                );
+                subPostsData[child.slug] = childPostsResponse.data.posts;
+              })
+            );
+          }
+          setSubPosts(subPostsData);
+        } else {
+          setError("Danh mục không tồn tại.");
+        }
+      } catch (err: unknown) {
+        handleError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoriesAndPosts();
+  }, [slug]); 
+
+  const handleError = (err: unknown) => {
+    if (axios.isAxiosError(err)) setError(err.message);
+    else if (err instanceof Error) setError(err.message);
+    else setError("Đã xảy ra lỗi không xác định");
+  };
+
+  const getFullImagePath = (image: string) =>
+    image.startsWith("http") ? image : `http://127.0.0.1:8000/storage/${image}`;
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="max-w-5xl mx-auto px-5 md:px-0">
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-4 py-2 flex gap-5 items-end">
-          <div className="md:text-xl text-lg font-semibold">Bất động sản</div>
-          <ul className="flex space-x-4 *:text-sm">
-            <li>
-              <Link to="/" className="hover:text-blue-500">
-                Trang chủ
-              </Link>
-            </li>
-            <li>
-              <Link to="/thị-trường" className="hover:text-blue-500">
-                Thị trường
-              </Link>
-            </li>
-            <li>
-              <Link to="/kinh-doanh" className="hover:text-blue-500">
-                Kinh doanh
-              </Link>
-            </li>
-            <li>
-              <Link to="/dự-án" className="hover:text-blue-500">
-                Dự án
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div className="px-4 py-6">
-        <div className="grid md:grid-cols-2 grid-cols-1 gap-x-6">
-          <div>
-            <img
-              className="w-full h-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-          </div>
-          <div className="p-4">
-            <h2 className="font-semibold md:text-lg text-base">
-              Điểm tin 8h: Triệt phá đường dây có hoa hậu bán dâm; Elon Musk
-              cảnh báo mối nguy hiểm về AI.
-            </h2>
-            <p>
-              Điểm tin cùng bạn 8h ngày 15-9: Hoàn thành đấu giá 11 biển số siêu
-              đẹp, dự thu lên tới trên 82 tỉ đồng; Nữ bệnh nhân 16 tuổi tố bị
-              sàm sỡ ở Bệnh viện Việt Đức: đã mời công an xác minh; Thủ tướng
-              Campuchia Hun Manet gặp Chủ tịch Trung Quốc...
-            </p>
-            <div className="mt-2 flex items-center gap-2 text-gray-400">
-              <FaMessage className="size-4" />
-              <span className="text-sm">28</span>
-            </div>
-          </div>
-        </div>
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5 py-6">
-          <div className="w-full flex flex-col gap-1">
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-            <h3 className="line-clamp-2">
-              Điểm tin 8h: Triệt phá đường dây có hoa hậu bán dâm...
-            </h3>
-            <p className="line-clamp-4 text-xs">
-              Điểm tin cùng bạn 8h ngày 15-9: Hoàn thành đấu giá 11 biển số siêu
-              đẹp, dự thu lên tới trên 82 tỉ đồng...
-            </p>
-          </div>
-          <div className="w-full flex flex-col gap-1">
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-            <h3 className="line-clamp-2">
-              Điểm tin 8h: Triệt phá đường dây có hoa hậu bán dâm...
-            </h3>
-            <p className="line-clamp-4 text-xs">
-              Điểm tin cùng bạn 8h ngày 15-9: Hoàn thành đấu giá 11 biển số siêu
-              đẹp, dự thu lên tới trên 82 tỉ đồng...
-            </p>
-          </div>
-          <div className="w-full flex flex-col gap-1">
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-            <h3 className="line-clamp-2">
-              Điểm tin 8h: Triệt phá đường dây có hoa hậu bán dâm...
-            </h3>
-            <p className="line-clamp-4 text-xs">
-              Điểm tin cùng bạn 8h ngày 15-9: Hoàn thành đấu giá 11 biển số siêu
-              đẹp, dự thu lên tới trên 82 tỉ đồng...
-            </p>
-          </div>
-          <div className="w-full flex flex-col gap-1">
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-            <h3 className="line-clamp-2">
-              Điểm tin 8h: Triệt phá đường dây có hoa hậu bán dâm...
-            </h3>
-            <p className="line-clamp-4 text-xs">
-              Điểm tin cùng bạn 8h ngày 15-9: Hoàn thành đấu giá 11 biển số siêu
-              đẹp, dự thu lên tới trên 82 tỉ đồng...
-            </p>
-          </div>
-        </div>
-        <div className="border-t border-b pt-5 pb-3">
-          <h3 className="text-xl font-bold">Thị trường</h3>
-        </div>
-        <div className="grid lg:grid-cols-3 grid-cols-1 gap-7 py-5">
-          <div className="grid grid-cols-2">
-            <h3 className="text-sm font-semibold">
-              Thêm khách sạn Hội An được ngân hàng giao bán
-            </h3>
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-          </div>
-          <div className="grid grid-cols-2">
-            <h3 className="text-sm font-semibold">
-              Thêm khách sạn Hội An được ngân hàng giao bán
-            </h3>
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-          </div>
-          <div className="grid grid-cols-2">
-            <h3 className="text-sm font-semibold">
-              Thêm khách sạn Hội An được ngân hàng giao bán
-            </h3>
-            <img
-              className="w-full"
-              src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-              alt=""
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-12 gap-5">
-          <div className="md:col-span-8 col-span-12">
-            <div className="border-t border-b pt-5 pb-3">
-              <h3 className="text-xl font-bold">Tin khác</h3>
-            </div>
-            <BlogActicle />
-            <BlogActicle />
-            <BlogActicle />
-            <BlogActicle />
-            <BlogActicle />
-            <BlogActicle />
-          </div>
-          <div className="md:col-span-4 col-span-12 mt-10 flex flex-col gap-10">
-            <div className="border p-5">
-              <div className="border-b pb-3">
-                <h3 className="text-xl font-bold">Kinh doanh</h3>
+      {randomCategory && posts.length > 0 && (
+        <div key={randomCategory.slug}>
+          <div className="bg-white border-b border-gray-200">
+            <div className="px-4 py-2 flex gap-5 items-end">
+              <div className="md:text-xl text-lg font-semibold">
+                {randomCategory.name}
               </div>
-              <img
-                className="w-full"
-                src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-                alt=""
-              />
-              <h2 className="font-bold text-md py-3">
-                Liên danh ACC trúng gói thầu gần 6.300 tỷ đồng sân bay Long
-                Thành
-              </h2>
-              <span className="border-t border-b block py-2 text-sm">
-                Nhà nước sẽ can thiệp khi giá nhà đất tăng hơn 20% trong 3 tháng
-              </span>
-              <span className="border-t border-b block py-2 text-sm">
-                Nhà nước sẽ can thiệp khi giá nhà đất tăng hơn 20% trong 3 tháng
-              </span>
+              {randomCategory.children &&
+                randomCategory.children.length > 0 && (
+                  <ul className="flex space-x-4 text-sm">
+                    {randomCategory.children.map((child) => (
+                      <Link to={`/categories/${child.slug}`} key={child.slug}>
+                        {child.name}
+                      </Link>
+                    ))}
+                  </ul>
+                )}
             </div>
-            <div className="border p-5">
-              <div className="border-b pb-3">
-                <h3 className="text-xl font-bold">Tin dự án</h3>
+          </div>
+
+          <div className="px-4 py-6">
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-x-6">
+              <div>
+                <img
+                  className="w-full h-full"
+                  src={getFullImagePath(posts[0].image)}
+                  alt=""
+                />
               </div>
-              <img
-                className="w-full"
-                src="https://i1-kinhdoanh.vnecdn.net/2024/10/06/israel-1728192975-8011-1728193126.jpg?w=680&h=408&q=100&dpr=1&fit=crop&s=_M0ezWPyGBZ-JLm0MDDUEA"
-                alt=""
-              />
-              <h2 className="font-bold text-md py-3">
-                Liên danh ACC trúng gói thầu gần 6.300 tỷ đồng sân bay Long
-                Thành
-              </h2>
-              <span className="border-t border-b block py-2 text-sm">
-                Nhà nước sẽ can thiệp khi giá nhà đất tăng hơn 20% trong 3 tháng
-              </span>
-              <span className="border-t border-b block py-2 text-sm">
-                Nhà nước sẽ can thiệp khi giá nhà đất tăng hơn 20% trong 3 tháng
-              </span>
+              <div className="p-4">
+                <h2 className="font-semibold md:text-lg text-base">
+                  {posts[0].title}
+                </h2>
+                <p>{posts[0].excerpt}</p>
+                <div className="mt-2 flex items-center gap-2 text-gray-400">
+                  <FaMessage className="size-4" />
+                  <span className="text-sm">28</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5 py-6">
+              {posts.slice(1, 5).map((post) => (
+                <div key={post.id} className="w-full flex flex-col gap-1">
+                  <img
+                    className="w-full"
+                    src={getFullImagePath(post.image)}
+                    alt={post.title}
+                  />
+                  <h3 className="line-clamp-2">{post.title}</h3>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-12 gap-4">
+              <div className="md:col-span-5 col-span-12">
+                {posts.slice(0, 8).map(
+                  (
+                    item 
+                  ) => (
+                    <Link
+                      to={`/posts/${item.slug}`}
+                      key={item.id}
+                      className="flex flex-col gap-2 border-b py-4"
+                    >
+                      <h2 className="md:text-lg text-sm font-semibold">
+                        {item.title}
+                      </h2>
+                      <div className="flex gap-2">
+                        <img
+                          src={getFullImagePath(item.image)}
+                          alt={item.title}
+                          className="max-w-44 w-full h-fit"
+                        />
+                        <div>
+                          <span className="md:text-sm text-xs">
+                            {item.excerpt}
+                          </span>
+                          <div className="flex items-center gap-2 text-gray-400">
+                            <FaMessage className="size-3" />
+                            <span className="text-xs">{item.views}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                )}
+              </div>
+
+              <div className="md:col-span-7 col-span-12">
+                {randomCategory.children &&
+                  randomCategory.children.length > 0 && (
+                    <div>
+                      {randomCategory.children.map((child) => (
+                        <div key={child.slug} className="py-4">
+                          <h4 className="md:text-xl text-lg font-semibold text-gray-800 border-b border-red-800 whitespace-nowrap w-auto">
+                            {child.name}
+                          </h4>
+
+                          <div className="grid md:grid-cols-2 grid-cols-1 gap-4 ">
+                            <div>
+                              {subPosts[child.slug] &&
+                                subPosts[child.slug].length > 0 && (
+                                  <div className="flex-col gap-4 border-b py-2">
+                                    <img
+                                      src={getFullImagePath(
+                                        subPosts[child.slug][0].image
+                                      )}
+                                      alt={subPosts[child.slug][0].title}
+                                      className="w-full h-44 object-cover"
+                                    />
+                                    <div className="bg-gray-100 p-4">
+                                      <h5 className="text-sm font-semibold mb-3">
+                                        {subPosts[child.slug][0].title}
+                                      </h5>
+                                      <p className="text-xs">
+                                        {subPosts[child.slug][0].excerpt}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                            <div>
+                              <div className="flex flex-col">
+                                {subPosts[child.slug] &&
+                                subPosts[child.slug].length > 1 ? (
+                                  subPosts[child.slug]
+                                    .slice(1, 4)
+                                    .map((subPost) => (
+                                      <Link
+                                        to={`/posts/${subPost.slug}`}
+                                        key={subPost.id}
+                                        className="flex flex-col gap-2 border-b py-2"
+                                      >
+                                        <h5 className="text-sm font-semibold">
+                                          {subPost.title}
+                                        </h5>
+                                        <p className="text-xs">
+                                          {subPost.excerpt}
+                                        </p>
+                                      </Link>
+                                    ))
+                                ) : (
+                                  <p className="text-gray-500">
+                                    Không có bài viết nào.
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

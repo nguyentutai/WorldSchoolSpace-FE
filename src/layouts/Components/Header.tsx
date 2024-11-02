@@ -140,7 +140,7 @@ const Header = () => {
             </li>
             {categories.map((category) => (
               <li key={category.user_id} className="border-e px-3">
-                <Link to={`/category/${category.slug}`}>{category.name}</Link>
+                <Link to={`/news/${category.slug}`}>{category.name}</Link>
               </li>
             ))}
           </ul>
