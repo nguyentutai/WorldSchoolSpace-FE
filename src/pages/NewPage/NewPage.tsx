@@ -6,6 +6,7 @@ import { axiosInstance } from "../../config/axiosConfig";
 import { Category } from "../../components/interfaces/category";
 import { Post } from "../../components/interfaces/post";
 import axios from "axios";
+import { Skeleton } from "antd"; // Import Skeleton from Ant Design
 
 const NewPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -68,7 +69,28 @@ const NewPage = () => {
   const getFullImagePath = (image: string) =>
     image.startsWith("http") ? image : `http://127.0.0.1:8000/storage/${image}`;
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-5 md:px-0">
+        {/* Skeleton for category header */}
+        <Skeleton active paragraph={{ rows: 1 }} className="mb-4" />
+        <Skeleton active paragraph={{ rows: 1 }} className="mb-4" />
+        {/* Skeleton for main image */}
+        <Skeleton.Image className="w-full h-60 mb-4" />
+        {/* Skeleton for main title and excerpt */}
+        <Skeleton active paragraph={{ rows: 2 }} className="mb-4" />
+        {/* Skeleton for other posts */}
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-5 py-6">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton.Image key={index} className="w-full h-32 mb-4" />
+          ))}
+        </div>
+        {/* Skeleton for sub posts */}
+        <Skeleton active paragraph={{ rows: 3 }} className="mb-4" />
+      </div>
+    );
+  }
+
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -196,25 +218,27 @@ const NewPage = () => {
                                 {subPosts[child.slug] &&
                                 subPosts[child.slug].length > 1 ? (
                                   subPosts[child.slug]
-                                    .slice(1, 4)
+                                    .slice(1, 3)
                                     .map((subPost) => (
                                       <Link
                                         to={`/posts/${subPost.slug}`}
                                         key={subPost.id}
-                                        className="flex flex-col gap-2 border-b py-2"
+                                        className="py-2 border-b flex items-center"
                                       >
-                                        <h5 className="text-sm font-semibold">
+                                        <img
+                                          src={getFullImagePath(subPost.image)}
+                                          alt={subPost.title}
+                                          className="max-w-16 w-12 h-12 object-cover"
+                                        />
+                                        <span className="text-sm font-medium pl-2">
                                           {subPost.title}
-                                        </h5>
-                                        <p className="text-xs">
-                                          {subPost.excerpt}
-                                        </p>
+                                        </span>
                                       </Link>
                                     ))
                                 ) : (
-                                  <p className="text-gray-500">
-                                    Không có bài viết nào.
-                                  </p>
+                                  <span className="text-gray-400">
+                                    Chưa có bài viết nào.
+                                  </span>
                                 )}
                               </div>
                             </div>

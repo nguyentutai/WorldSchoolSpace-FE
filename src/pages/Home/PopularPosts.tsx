@@ -3,15 +3,16 @@ import { Link } from "react-router-dom";
 import { axiosInstance } from "../../config/axiosConfig";
 import { Post } from "../../components/interfaces/post";
 import { FaMessage } from "react-icons/fa6";
+import { Skeleton } from "antd";
 
 const PopularPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const getFullImagePath = (image: string) => {
-    if (!image.startsWith("http")) {
-      return `http://127.0.0.1:8000/storage/${image}`;
-    }
-    return image;
+    return image.startsWith("http")
+      ? image
+      : `http://127.0.0.1:8000/storage/${image}`;
   };
 
   const shufflePosts = (posts: Post[]) => {
@@ -22,19 +23,46 @@ const PopularPosts = () => {
     const fetchPosts = async () => {
       try {
         const response = await axiosInstance.get("/post/popular");
-
         const filteredPosts = response.data.data.filter(
           (post: Post) => post.views > 0
         );
         const shuffledPosts = shufflePosts(filteredPosts);
-
         setPosts(shuffledPosts);
       } catch (error) {
         console.error("Error fetching popular posts", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPosts();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="md:col-span-9 col-span-12">
+        {/* Skeleton cho bài viết chính */}
+        <div className="mb-4">
+          <Skeleton.Image className="w-full h-60" />
+          <Skeleton active paragraph={{ rows: 1 }} />
+          <Skeleton active paragraph={{ rows: 1 }} className="mt-2" />
+          <Skeleton active paragraph={{ rows: 1 }} className="mt-2" />
+        </div>
+
+        {/* Skeleton cho bài viết phụ */}
+        <div className="border-t mt-6 pt-3 grid grid-cols-12 gap-5">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex flex-col gap-2 md:col-span-4 col-span-12"
+            >
+              <Skeleton.Image className="w-full h-32" />
+              <Skeleton active paragraph={{ rows: 1 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (posts.length === 0) return null;
 
