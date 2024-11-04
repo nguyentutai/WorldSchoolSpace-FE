@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { axiosInstance } from "../../config/axiosConfig";
 import { Category } from "../../components/interfaces/category";
 import { Post } from "../../components/interfaces/post";
+import SubCategoryPageSkeleton from "./SubCategoryPageSkeleton";
 import axios from "axios";
 
 const SubCategoryPage = () => {
@@ -25,32 +26,30 @@ const SubCategoryPage = () => {
 
         const selectedSubCategory = categories
           .flatMap((cat: Category) =>
-            cat.children?.map((child) => ({ ...child, parent: cat }))
+            cat.children
+              ? cat.children.map((child) => ({ ...child, parent: cat }))
+              : []
           )
-          .find((child) => child.slug === slug);
+          .find((child: Category) => child.slug === slug);
 
         if (!selectedSubCategory) {
           throw new Error("Danh mục con không tồn tại.");
         }
 
-        console.log("Selected Subcategory:", selectedSubCategory); // Log danh mục con
-
         setSubCategory(selectedSubCategory);
 
-        // Fetch posts for the selected subcategory
         const { data: postsResponse } = await axiosInstance.get(
           `/category/${selectedSubCategory.slug}/posts`
         );
-        console.log("test 1:", postsResponse); // Log phản hồi bài viết
         setPosts(postsResponse.posts);
 
         if (selectedSubCategory.parent) {
-          const siblings = selectedSubCategory.parent.children.filter(
-            (child) => child.slug !== selectedSubCategory.slug
-          );
+          const siblings =
+            selectedSubCategory.parent.children?.filter(
+              (child: Category) => child.slug !== selectedSubCategory.slug
+            ) || [];
 
-          // Fetch posts for each sibling category
-          const postsPromises = siblings.map(async (sibling) => {
+          const postsPromises = siblings.map(async (sibling: Category) => {
             const { data: siblingPostsResponse } = await axiosInstance.get(
               `/category/${sibling.slug}/posts`
             );
@@ -59,10 +58,8 @@ const SubCategoryPage = () => {
 
           const siblingsWithPosts = await Promise.all(postsPromises);
           setOtherSubCategories(siblingsWithPosts);
-          console.log("test 2:", siblingsWithPosts); // Log danh mục con khác cùng với bài viết
         }
       } catch (err: unknown) {
-        console.error(err); // Log lỗi
         handleError(err);
       } finally {
         setLoading(false);
@@ -71,6 +68,7 @@ const SubCategoryPage = () => {
 
     fetchSubCategoryAndPosts();
   }, [slug]);
+
   const handleError = (err: unknown) => {
     if (axios.isAxiosError(err)) {
       setError(err.message);
@@ -84,15 +82,13 @@ const SubCategoryPage = () => {
   const getFullImagePath = (image: string) =>
     image.startsWith("http") ? image : `http://127.0.0.1:8000/storage/${image}`;
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <SubCategoryPageSkeleton />;
   if (error) return <div>Error: {error}</div>;
-  console.log("test 3:", otherSubCategories);
 
   return (
     <div className="max-w-5xl mx-auto px-5 md:px-0">
       {subCategory && posts.length > 0 ? (
         <div>
-          {/* Main content column */}
           <div className="bg-white border-b border-gray-200">
             <div className="px-4 py-2 flex gap-5 items-center">
               {subCategory.parent && (
@@ -111,7 +107,7 @@ const SubCategoryPage = () => {
               )}
               {subCategory.parent?.children && (
                 <ul className="flex space-x-4 text-sm px-4 py-2 mt-3">
-                  {subCategory.parent.children.map((child) => (
+                  {subCategory.parent.children.map((child: Category) => (
                     <Link to={`/categories/${child.slug}`} key={child.slug}>
                       <li
                         className={`font-semibold ${
@@ -131,7 +127,7 @@ const SubCategoryPage = () => {
           <div className="flex mt-5">
             <div className="flex-1 mr-4">
               {posts.length > 0 && (
-                <div className="md:col-span-8 col-span-12 flex bg-gray-100 ">
+                <div className="md:col-span-8 col-span-12 flex bg-gray-100">
                   <img
                     src={getFullImagePath(posts[0].image)}
                     alt={posts[0].title}
@@ -209,23 +205,18 @@ const SubCategoryPage = () => {
                                 <p className="text-xs">{posts[0].excerpt}</p>
                               </div>
                             </div>
-                            {/* Hiển thị chỉ 2 bài viết */}
-                            {posts.slice(1, 2).map(
-                              (
-                                subPost // Chỉnh sửa ở đây để chỉ lấy 2 bài viết
-                              ) => (
-                                <Link
-                                  to={`/posts/${subPost.slug}`}
-                                  key={subPost.id}
-                                  className="flex flex-col gap-2 border-b py-2"
-                                >
-                                  <h5 className="text-sm font-semibold">
-                                    {subPost.title}
-                                  </h5>
-                                  <p className="text-xs">{subPost.excerpt}</p>
-                                </Link>
-                              )
-                            )}
+                            {posts.slice(1, 3).map((subPost) => (
+                              <Link
+                                to={`/posts/${subPost.slug}`}
+                                key={subPost.id}
+                                className="flex flex-col gap-2 border-b py-2"
+                              >
+                                <h5 className="text-sm font-semibold">
+                                  {subPost.title}
+                                </h5>
+                                <p className="text-xs">{subPost.excerpt}</p>
+                              </Link>
+                            ))}
                           </div>
                         ) : (
                           <p className="text-xs">Không có bài viết nào khác.</p>
@@ -241,7 +232,7 @@ const SubCategoryPage = () => {
       ) : (
         <div className="flex flex-col items-center justify-center">
           <h2 className="text-lg font-semibold">
-            Không có bài viết nào trong danh mục con này.
+            Không có bài viết nào trong danh mục này.
           </h2>
         </div>
       )}
