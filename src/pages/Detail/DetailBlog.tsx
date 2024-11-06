@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { PacmanLoader } from "react-spinners";
 import { message, Popconfirm, Button } from "antd";
 import { getDetailPost } from "../../services/Post";
 import { postComment, getComment, deleteComment } from "../../services/Comment";
@@ -10,12 +11,15 @@ import { IPost, IGetComment } from "../../types/IBlogDetail";
 const DetailBlog = () => {
   const { slug } = useParams();
   const [blog, setBlog] = useState<IPost>();
+  const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<string>();
   const [comment, setComment] = useState<IGetComment[]>();
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       const data = await getDetailPost(slug!);
+      setLoading(false);
       setBlog(data);
     })();
   }, []);
@@ -45,7 +49,12 @@ const DetailBlog = () => {
     message.success("Xóa bình luận thành công");
   };
 
-  console.log(comment);
+  if (loading)
+    return (
+      <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-10">
+        <PacmanLoader speedMultiplier={3} color="#c10d0d" />
+      </div>
+    );
 
   return (
     <div>
