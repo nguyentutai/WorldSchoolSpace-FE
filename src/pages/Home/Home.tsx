@@ -141,12 +141,6 @@ const Home = () => {
     <div className="max-w-5xl mx-auto md:px-0 px-5">
       <div className="py-5 grid grid-cols-12 gap-5">
         <PopularPosts />
-        <div className="col-span-3 md:block hidden">
-          <img
-            src="https://tpc.googlesyndication.com/pagead/imgad?id=CICAgOD7ptrlhwEQARgBMgjHP8G7oPxcsQ"
-            alt=""
-          />
-        </div>
       </div>
       <div className="grid grid-cols-12 gap-4">
         <div className="md:col-span-5 col-span-12">
@@ -182,7 +176,7 @@ const Home = () => {
           <NewBlog categoryId={categoryId} />
         </div>
       </div>
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-5 border-t py-5">
+      <div className="">
         <NewBlog2 categoryId={categoryId} />
       </div>
     </div>
