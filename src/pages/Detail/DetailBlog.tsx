@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { message, Popconfirm, Button } from "antd";
 import { getDetailPost } from "../../services/Post";
@@ -7,13 +7,24 @@ import { postComment, getComment, deleteComment } from "../../services/Comment";
 import { MdDelete } from "react-icons/md";
 
 import { IPost, IGetComment } from "../../types/IBlogDetail";
+import routes from "../../config/routes";
 
 const DetailBlog = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [blog, setBlog] = useState<IPost>();
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<string>();
   const [comment, setComment] = useState<IGetComment[]>();
+  const [user_id, setUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserId(user.id);
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -34,8 +45,13 @@ const DetailBlog = () => {
   }, [blog?.id]);
 
   const handleComment = async () => {
+    if (!user_id) {
+      message.warning("Bạn cần đăng nhập để bình luận.");
+      navigate(routes.Signin);
+      return;
+    }
     const data = await postComment(blog?.id!, {
-      user_id: 1,
+      user_id: user_id,
       content: content!,
     });
     setComment([...comment!, data.data]);
@@ -99,50 +115,52 @@ const DetailBlog = () => {
           </form>
         </div>
 
-        <div className="pt-5 pb-10">
-          <h2 className="text-xl font-semibold py-1">Danh sách bình luận</h2>
-          <div className="flex flex-col gap-4">
-            {comment && comment.length > 0 ? (
-              comment?.map((item, index) => {
-                const isoDate = new Date(item.created_at);
-                const formattedDate = isoDate.toLocaleDateString("vi-VN", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                });
-                return (
-                  <div
-                    key={index}
-                    className="border rounded-md py-3 flex justify-between items-center px-4"
-                  >
-                    <div className="flex flex-col gap-2 max-w-[95%] w-full">
-                      <div className="flex gap-2 items-center">
-                        <h2 className="font-medium">{item.user.name}</h2>
-                        <span className="text-xs">{formattedDate}</span>
+        {comment && comment.length > 0 && (
+          <div className="pt-5 pb-10">
+            <h2 className="text-xl font-semibold py-1">Danh sách bình luận</h2>
+            <div className="flex flex-col gap-4">
+              {comment && comment.length > 0 ? (
+                comment?.map((item, index) => {
+                  const isoDate = new Date(item.created_at);
+                  const formattedDate = isoDate.toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  });
+                  return (
+                    <div
+                      key={index}
+                      className="border rounded-md py-3 flex justify-between items-center px-4"
+                    >
+                      <div className="flex flex-col gap-2 max-w-[95%] w-full">
+                        <div className="flex gap-2 items-center">
+                          <h2 className="font-medium">{item.user.name}</h2>
+                          <span className="text-xs">{formattedDate}</span>
+                        </div>
+                        <div className="text-sm text-[#636363] break-words w-full">
+                          {item.content}
+                        </div>
                       </div>
-                      <div className="text-sm text-[#636363] break-words w-full">
-                        {item.content}
+                      <div>
+                        <Popconfirm
+                          title="Xóa bình luận"
+                          description="Bạn có chắc chắn muốn xóa không"
+                          onConfirm={() => handleDelete(item.id)}
+                          okText="Xác nhận"
+                          cancelText="Hủy"
+                        >
+                          <MdDelete className="size-4 text-red-500 cursor-pointer hover:opacity-90" />
+                        </Popconfirm>
                       </div>
                     </div>
-                    <div>
-                      <Popconfirm
-                        title="Xóa bình luận"
-                        description="Bạn có chắc chắn muốn xóa không"
-                        onConfirm={() => handleDelete(item.id)}
-                        okText="Xác nhận"
-                        cancelText="Hủy"
-                      >
-                        <MdDelete className="size-4 text-red-500 cursor-pointer hover:opacity-90" />
-                      </Popconfirm>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div>Không có bình luận</div>
-            )}
+                  );
+                })
+              ) : (
+                <div>Không có bình luận</div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
