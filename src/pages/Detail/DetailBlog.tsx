@@ -45,6 +45,10 @@ const DetailBlog = () => {
   }, [blog?.id]);
 
   const handleComment = async () => {
+    if (!content) {
+      message.warning("Vui lòng nhập thông tin để bình luận");
+      return;
+    }
     if (!user_id) {
       message.warning("Bạn cần đăng nhập để bình luận.");
       navigate(routes.Signin);

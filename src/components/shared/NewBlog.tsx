@@ -17,11 +17,13 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sử dụng caching cho các request để giảm tải API
+  const categoryCache = React.useRef<{ [key: string]: Post[] }>({});
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("/category");
-        console.log("Danh mục:", response.data);
         setCategories(response.data);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
@@ -47,15 +49,30 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
   useEffect(() => {
     const fetchPostsForCategories = async () => {
       try {
-        const postsMap: { [key: string]: Post[] } = {};
-        for (const category of categories) {
-          const response = await axiosInstance.get(
-            `/category/${category.slug}/posts`
+        const requests = categories
+          .filter((category) => !categoryCache.current[category.slug])
+          .map((category) =>
+            axiosInstance
+              .get(`/category/${category.slug}/posts`)
+              .then((response) => {
+                const sortedPosts = response.data.posts.sort(
+                  () => Math.random() - 0.5
+                );
+                categoryCache.current[category.slug] = sortedPosts;
+                return { slug: category.slug, posts: sortedPosts };
+              })
           );
-          postsMap[category.slug] = response.data.posts.sort(
-            () => Math.random() - 0.5
-          );
-        }
+
+        const results = await Promise.all(requests);
+
+        const postsMap = results.reduce(
+          (acc, { slug, posts }) => {
+            acc[slug] = posts;
+            return acc;
+          },
+          { ...categoryCache.current } as { [key: string]: Post[] }
+        );
+
         setPostsByCategory(postsMap);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
@@ -139,9 +156,9 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                 </div>
 
                 <div className="flex mb-4">
-                  {posts.length > 0 ? (
+                  {posts.length > 0 && (
                     <>
-                      {posts.slice(0, 2).map((post, index) => (
+                      {posts.slice(0, 1).map((post, index) => (
                         <div
                           key={post.id}
                           className={`flex ${
@@ -155,7 +172,7 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                               className="w-56 h-44 mb-2 p-2"
                             />
                           )}
-                          <div className="flex-1 w-44">
+                          <div className="flex-1">
                             <h2 className="font-semibold text-base text-gray-800">
                               {post.title}
                             </h2>
@@ -163,19 +180,14 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                               {post.excerpt}
                             </p>
                           </div>
-                          {index % 2 === 0 && (
-                            <div className="border-l border-gray-300 h-44 mx-4"></div>
-                          )}
                         </div>
                       ))}
                     </>
-                  ) : (
-                    <p>Không có bài viết nào trong danh mục này.</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-5 border-b pb-5 mb-6">
-                  {posts.length > 2 ? (
+                  {posts.length > 2 &&
                     posts.slice(2, 5).map((post) => (
                       <div
                         key={post.id}
@@ -188,10 +200,7 @@ const NewBlog: React.FC<NewBlogProps> = ({ categoryId }) => {
                           {post.title}
                         </h3>
                       </div>
-                    ))
-                  ) : (
-                    <p>Không có bài viết nào trong danh mục này.</p>
-                  )}
+                    ))}
                 </div>
               </li>
             );
