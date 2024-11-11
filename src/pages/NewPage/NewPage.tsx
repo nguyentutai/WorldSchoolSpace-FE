@@ -95,7 +95,7 @@ const NewPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-5 md:px-0">
-      {randomCategory && posts.length > 0 && (
+      {randomCategory && posts.length > 0 ? (
         <div key={randomCategory.slug}>
           <div className="bg-white border-b border-gray-200">
             <div className="px-4 py-2 flex gap-5 items-end">
@@ -250,6 +250,10 @@ const NewPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      ) : (
+        <div className="flex justify-center absolute top-1/3 left-1/2 -translate-x-1/2 text-lg font-medium">
+          Không có bài viết nào
         </div>
       )}
     </div>

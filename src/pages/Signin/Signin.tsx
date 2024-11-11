@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, message, Spin } from "antd";
 import { useState } from "react";
-import axios from "axios";
 import { axiosInstance } from "../../config/axiosConfig";
 
 const Signin = () => {
