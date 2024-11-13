@@ -125,12 +125,6 @@ const DetailBlog = () => {
             <div className="flex flex-col gap-4">
               {comment && comment.length > 0 ? (
                 comment?.map((item, index) => {
-                  const isoDate = new Date(item.created_at);
-                  const formattedDate = isoDate.toLocaleDateString("vi-VN", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  });
                   return (
                     <div
                       key={index}
@@ -139,7 +133,6 @@ const DetailBlog = () => {
                       <div className="flex flex-col gap-2 max-w-[95%] w-full">
                         <div className="flex gap-2 items-center">
                           <h2 className="font-medium">{item.user.name}</h2>
-                          <span className="text-xs">{formattedDate}</span>
                         </div>
                         <div className="text-sm text-[#636363] break-words w-full">
                           {item.content}

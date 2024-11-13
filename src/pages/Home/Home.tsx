@@ -51,9 +51,6 @@ const Home = () => {
       <div className="max-w-5xl mx-auto md:px-0 px-5">
         <div className="py-5 grid grid-cols-12 gap-5">
           <PopularPosts />
-          <div className="col-span-3 md:block hidden">
-            <div className="skeleton h-52 bg-gray-300 rounded"></div>
-          </div>
         </div>
         <div className="grid grid-cols-12 gap-4">
           <div className="md:col-span-5 col-span-12">
