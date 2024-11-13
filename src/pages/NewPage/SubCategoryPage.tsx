@@ -196,7 +196,7 @@ const SubCategoryPage = () => {
                               <img
                                 src={getFullImagePath(posts[0].image)}
                                 alt={posts[0].title}
-                                className="w-full h-44 object-cover"
+                                className="w-full h-56 object-cover"
                               />
                               <div className="bg-gray-100 p-4">
                                 <h5 className="text-sm font-semibold mb-3">
@@ -205,18 +205,23 @@ const SubCategoryPage = () => {
                                 <p className="text-xs">{posts[0].excerpt}</p>
                               </div>
                             </div>
-                            {posts.slice(1, 3).map((subPost) => (
-                              <Link
-                                to={`/posts/${subPost.slug}`}
-                                key={subPost.id}
-                                className="flex flex-col gap-2 border-b py-2"
-                              >
-                                <h5 className="text-sm font-semibold">
-                                  {subPost.title}
-                                </h5>
-                                <p className="text-xs">{subPost.excerpt}</p>
-                              </Link>
-                            ))}
+                            {/* Hiển thị chỉ 2 bài viết */}
+                            {posts.slice(1, 2).map(
+                              (
+                                subPost // Chỉnh sửa ở đây để chỉ lấy 2 bài viết
+                              ) => (
+                                <Link
+                                  to={`/posts/${subPost.slug}`}
+                                  key={subPost.id}
+                                  className="flex flex-col gap-2 border-b py-2"
+                                >
+                                  <h5 className="text-sm font-semibold">
+                                    {subPost.title}
+                                  </h5>
+                                  <p className="text-xs">{subPost.excerpt}</p>
+                                </Link>
+                              )
+                            )}
                           </div>
                         ) : (
                           <p className="text-xs">Không có bài viết nào khác.</p>
