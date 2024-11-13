@@ -2,20 +2,29 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { message, Popconfirm, Button } from "antd";
-import { getDetailPost } from "../../services/Post";
+import { getDetailPost, getCategoryDetailPost } from "../../services/Post";
 import { postComment, getComment, deleteComment } from "../../services/Comment";
 import { MdDelete } from "react-icons/md";
 
-import { IPost, IGetComment } from "../../types/IBlogDetail";
+import { IPost, IGetComment, IPostCate } from "../../types/IBlogDetail";
 import routes from "../../config/routes";
 
 const DetailBlog = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [blog, setBlog] = useState<IPost>();
+  const [blogCate, setBlogCate] = useState<IPostCate>();
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<string>();
   const [comment, setComment] = useState<IGetComment[]>();
+
+  const [visibleComments, setVisibleComments] = useState(3);
+
+  // Function to load more comments
+  const showMoreComments = () => {
+    setVisibleComments(comment?.length || 0);
+  };
+
   const [user_id, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -34,6 +43,15 @@ const DetailBlog = () => {
       setBlog(data);
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const data = await getCategoryDetailPost(blog?.category.slug!);
+      setLoading(false);
+      setBlogCate(data);
+    })();
+  }, [blog?.category.slug]);
 
   useEffect(() => {
     (async () => {
@@ -88,19 +106,9 @@ const DetailBlog = () => {
       </div>
       <div className="max-w-5xl mx-auto px-5">
         <h2 className="text-xl font-semibold pt-2">{blog?.title}</h2>
-        <div className="py-2 flex gap-2">
-          {blog?.tags.map((item, index) => (
-            <div
-              key={index}
-              className="bg-gray-200 w-fit px-2 py-1 rounded-md text-red-500 text-sm"
-            >
-              {item.name}
-            </div>
-          ))}
-        </div>
         <div dangerouslySetInnerHTML={{ __html: blog?.content || "" }} />
         <div className="py-4">
-          <h2 className="text-xl font-semibold">Bình luận</h2>
+          <h2 className="text-xl font-semibold">Ý Kiến</h2>
           <form action="">
             <textarea
               name=""
@@ -108,13 +116,13 @@ const DetailBlog = () => {
               onChange={(e) => setContent(e.target.value)}
               id=""
               className="border outline-none w-full my-2 min-h-[150px] p-4 text-sm rounded-md"
-              placeholder="Thêm bình luận"
+              placeholder="Chia sẻ ý kiến của bạn"
             ></textarea>
             <Button
               onClick={handleComment}
               className="bg-blue-500 px-4 py-2 rounded-md text-white hover:opacity-90 duration-200"
             >
-              Gửi bình luận
+              Gửi
             </Button>
           </form>
         </div>
@@ -124,13 +132,7 @@ const DetailBlog = () => {
             <h2 className="text-xl font-semibold py-1">Danh sách bình luận</h2>
             <div className="flex flex-col gap-4">
               {comment && comment.length > 0 ? (
-                comment?.map((item, index) => {
-                  const isoDate = new Date(item.created_at);
-                  const formattedDate = isoDate.toLocaleDateString("vi-VN", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  });
+                comment.slice(0, visibleComments)?.map((item, index) => {
                   return (
                     <div
                       key={index}
@@ -139,7 +141,6 @@ const DetailBlog = () => {
                       <div className="flex flex-col gap-2 max-w-[95%] w-full">
                         <div className="flex gap-2 items-center">
                           <h2 className="font-medium">{item.user.name}</h2>
-                          <span className="text-xs">{formattedDate}</span>
                         </div>
                         <div className="text-sm text-[#636363] break-words w-full">
                           {item.content}
@@ -163,8 +164,47 @@ const DetailBlog = () => {
                 <div>Không có bình luận</div>
               )}
             </div>
+            {visibleComments < comment.length && (
+              <Button
+                onClick={showMoreComments}
+                className="bg-blue-500 px-4 mt-4 py-2 rounded-md text-white hover:opacity-90 duration-200"
+              >
+                Xem thêm
+              </Button>
+            )}
           </div>
         )}
+        <div className="flex gap-3 items-center font-semibold text-lg">
+          <h2>Tags: </h2>
+          <div className="py-2 flex gap-2">
+            {blog?.tags.map((item, index) => (
+              <div
+                key={index}
+                className="bg-gray-200 w-fit px-2 py-1 rounded-md text-red-500 text-sm"
+              >
+                {item.name}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="pt-5 pb-10">
+          <h2 className="text-xl font-semibold py-1">Cùng chuyên mục</h2>
+          {blogCate?.posts &&
+            blogCate?.posts.length > 0 &&
+            blogCate?.posts.map((item) => (
+              <div className="flex gap-5 border-b py-5">
+                <img
+                  src={`http://127.0.0.1:8000/storage/${item.image}`}
+                  alt=""
+                  className="w-[410px]"
+                />
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <p className="line-clamp-3 text-base">{item.excerpt}</p>
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );
