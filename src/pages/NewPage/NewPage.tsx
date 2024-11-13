@@ -218,27 +218,25 @@ const NewPage = () => {
                                 {subPosts[child.slug] &&
                                 subPosts[child.slug].length > 1 ? (
                                   subPosts[child.slug]
-                                    .slice(1, 3)
+                                    .slice(1, 4)
                                     .map((subPost) => (
                                       <Link
                                         to={`/posts/${subPost.slug}`}
                                         key={subPost.id}
-                                        className="py-2 border-b flex items-center"
+                                        className="flex flex-col gap-2 border-b py-2"
                                       >
-                                        <img
-                                          src={getFullImagePath(subPost.image)}
-                                          alt={subPost.title}
-                                          className="max-w-16 w-12 h-12 object-cover"
-                                        />
-                                        <span className="text-sm font-medium pl-2">
+                                        <h5 className="text-sm font-semibold">
                                           {subPost.title}
-                                        </span>
+                                        </h5>
+                                        <p className="text-xs">
+                                          {subPost.excerpt}
+                                        </p>
                                       </Link>
                                     ))
                                 ) : (
-                                  <span className="text-gray-400">
-                                    Chưa có bài viết nào.
-                                  </span>
+                                  <p className="text-gray-500">
+                                    Không có bài viết nào.
+                                  </p>
                                 )}
                               </div>
                             </div>

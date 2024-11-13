@@ -38,6 +38,9 @@ export interface IPost {
   user: User;
   category: Category;
 }
+export interface IPostCate {
+  posts: IPost[];
+}
 
 export interface IPostComment {
   user_id: number;
