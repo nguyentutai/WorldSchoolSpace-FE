@@ -20,7 +20,6 @@ const DetailBlog = () => {
 
   const [visibleComments, setVisibleComments] = useState(3);
 
-  // Function to load more comments
   const showMoreComments = () => {
     setVisibleComments(comment?.length || 0);
   };
@@ -132,7 +131,7 @@ const DetailBlog = () => {
             <h2 className="text-xl font-semibold py-1">Danh sách bình luận</h2>
             <div className="flex flex-col gap-4">
               {comment && comment.length > 0 ? (
-                comment.slice(0, visibleComments)?.map((item, index) => {
+                comment?.map((item, index) => {
                   return (
                     <div
                       key={index}

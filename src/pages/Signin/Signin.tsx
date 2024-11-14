@@ -1,9 +1,12 @@
+// Signin.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, message, Spin } from "antd";
 import { useState } from "react";
 import { axiosInstance } from "../../config/axiosConfig";
+import { useUser } from "../../components/shared/UserContext";
 
 const Signin = () => {
+  const { setUser } = useUser();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,8 +23,10 @@ const Signin = () => {
       if (access_token) {
         localStorage.setItem("token", access_token);
         localStorage.setItem("user", JSON.stringify(user));
+        setUser(user); 
+
         message.success("Login successful!");
-        navigate("/");
+        navigate("/"); 
       } else {
         message.error("No token received. Please check your credentials.");
       }
@@ -31,6 +36,7 @@ const Signin = () => {
       setLoading(false);
     }
   };
+
   return (
     <div className="container flex flex-col mx-auto mt-5 bg-white rounded-lg">
       <div className="flex justify-center w-full h-full my-auto lg:justify-normal draggable">

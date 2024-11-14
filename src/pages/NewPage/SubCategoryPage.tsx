@@ -205,10 +205,9 @@ const SubCategoryPage = () => {
                                 <p className="text-xs">{posts[0].excerpt}</p>
                               </div>
                             </div>
-                            {/* Hiển thị chỉ 2 bài viết */}
                             {posts.slice(1, 2).map(
                               (
-                                subPost // Chỉnh sửa ở đây để chỉ lấy 2 bài viết
+                                subPost
                               ) => (
                                 <Link
                                   to={`/posts/${subPost.slug}`}
