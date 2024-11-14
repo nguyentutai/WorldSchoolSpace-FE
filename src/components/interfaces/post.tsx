@@ -1,5 +1,5 @@
 export interface Post {
-  id: number;
+  id: number | string;
   user_id: number;
   category_id: number;
   title: string; // Ensure 'title' is defined

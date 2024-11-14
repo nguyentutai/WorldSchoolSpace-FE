@@ -1,3 +1,4 @@
+// Header.tsx
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiMiniBars3, HiOutlineBell, HiUserPlus } from "react-icons/hi2";
@@ -6,18 +7,17 @@ import { IoHome, IoSearchOutline } from "react-icons/io5";
 import { HiOutlineX } from "react-icons/hi";
 import { axiosInstance } from "../../config/axiosConfig";
 import { Category } from "../../components/interfaces/category";
+import { useUser } from "../../components/shared/UserContext";
 
 const Header = () => {
-  const [userName, setUserName] = useState<string | null>(null);
+  const { user, setUser, logout } = useUser();
   const [categories, setCategories] = useState<Category[]>([]);
   const [toggleMenu, setToggleMenu] = useState<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUserName(null);
+    logout();
     navigate(config.routes.Signin);
   };
 
@@ -25,12 +25,6 @@ const Header = () => {
   const handleIconClick = () => setIsInputVisible(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setUserName(user.name);
-    }
-
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("/category");
@@ -102,9 +96,9 @@ const Header = () => {
                 </form>
               </li>
               <li className="flex items-center border-s px-3">
-                {userName ? (
+                {user ? (
                   <div className="flex gap-2 items-center">
-                    <span className="text-sm">{userName}</span>
+                    <span className="text-sm">{user.name}</span>
                     <button onClick={handleLogout} className="text-red-600">
                       Đăng xuất
                     </button>

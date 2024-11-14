@@ -33,8 +33,13 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get("/post");
-        setPosts(response.data.data);
+        const response = await axiosInstance.get("/post", {
+          params: { per_page: 8 },
+        });
+        const shuffledPosts = response.data.data.sort(
+          () => 0.5 - Math.random()
+        );
+        setPosts(shuffledPosts.slice(0, 8));
       } catch (error) {
         setError(error as Error);
         setPosts([]);
@@ -51,9 +56,6 @@ const Home = () => {
       <div className="max-w-5xl mx-auto md:px-0 px-5">
         <div className="py-5 grid grid-cols-12 gap-5">
           <PopularPosts />
-          <div className="col-span-3 md:block hidden">
-            <div className="skeleton h-52 bg-gray-300 rounded"></div>
-          </div>
         </div>
         <div className="grid grid-cols-12 gap-4">
           <div className="md:col-span-5 col-span-12">
@@ -150,39 +152,35 @@ const Home = () => {
       </div>
       <div className="grid grid-cols-12 gap-4">
         <div className="md:col-span-5 col-span-12">
-          {posts
-            .sort(() => Math.random() - 0.5)
-            .map((item) => (
-              <Link
-                to={`/posts/${item.slug}`}
-                key={item.id}
-                className="flex flex-col gap-2 border-b py-4"
-              >
-                <h2 className="md:text-lg text-sm font-semibold">
-                  {item.title}
-                </h2>
-                <div className="flex gap-2">
-                  <img
-                    src={getFullImagePath(item.image)}
-                    alt={item.title}
-                    className="max-w-44 w-full h-fit"
-                  />
-                  <div>
-                    <span className="md:text-sm text-xs">{item.excerpt}</span>
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <FaMessage className="size-3" />
-                      <span className="text-xs">{item.views}</span>
-                    </div>
+          {posts.map((item) => (
+            <Link
+              to={`/posts/${item.slug}`}
+              key={item.id}
+              className="flex flex-col gap-2 border-b py-4"
+            >
+              <h2 className="md:text-lg text-sm font-semibold">{item.title}</h2>
+              <div className="flex gap-2">
+                <img
+                  src={getFullImagePath(item.image)}
+                  alt={item.title}
+                  className="max-w-44 w-full h-fit"
+                />
+                <div>
+                  <span className="md:text-sm text-xs">{item.excerpt}</span>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <FaMessage className="size-3" />
+                    <span className="text-xs">{item.views}</span>
                   </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            </Link>
+          ))}
         </div>
         <div className="md:col-span-7 col-span-12">
           <NewBlog categoryId={categoryId} />
         </div>
       </div>
-      <div className="">
+      <div className="mt-5">
         <NewBlog2 categoryId={categoryId} />
       </div>
     </div>

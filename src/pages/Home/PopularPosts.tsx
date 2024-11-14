@@ -8,6 +8,9 @@ import { Skeleton } from "antd";
 const PopularPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [commentCounts, setCommentCounts] = useState<{ [key: string]: number }>(
+    {}
+  );
 
   const getFullImagePath = (image: string) => {
     return image.startsWith("http")
@@ -19,15 +22,36 @@ const PopularPosts = () => {
     return posts.sort(() => Math.random() - 0.5);
   };
 
+  const fetchCommentCount = async (postId: string | number) => {
+    try {
+      const response = await axiosInstance.get(`/post/${postId}/comments`);
+      console.log("Comment count response:", response.data);
+      const count = response.data?.count;
+      if (count !== undefined) {
+        setCommentCounts((prevCounts) => ({
+          ...prevCounts,
+          [String(postId)]: count,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching comment count for post:", postId, error);
+    }
+  };
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axiosInstance.get("/post/popular");
+        const response = await axiosInstance.get("/posts/popular");
         const filteredPosts = response.data.data.filter(
           (post: Post) => post.views > 0
         );
         const shuffledPosts = shufflePosts(filteredPosts);
         setPosts(shuffledPosts);
+
+        // Lấy số bình luận cho mỗi bài viết
+        shuffledPosts.forEach((post) => {
+          fetchCommentCount(post.id);
+        });
       } catch (error) {
         console.error("Error fetching popular posts", error);
       } finally {
@@ -40,26 +64,7 @@ const PopularPosts = () => {
   if (loading) {
     return (
       <div className="md:col-span-9 col-span-12">
-        {/* Skeleton cho bài viết chính */}
-        <div className="mb-4">
-          <Skeleton.Image className="w-full h-60" />
-          <Skeleton active paragraph={{ rows: 1 }} />
-          <Skeleton active paragraph={{ rows: 1 }} className="mt-2" />
-          <Skeleton active paragraph={{ rows: 1 }} className="mt-2" />
-        </div>
-
-        {/* Skeleton cho bài viết phụ */}
-        <div className="border-t mt-6 pt-3 grid grid-cols-12 gap-5">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-2 md:col-span-4 col-span-12"
-            >
-              <Skeleton.Image className="w-full h-32" />
-              <Skeleton active paragraph={{ rows: 1 }} />
-            </div>
-          ))}
-        </div>
+        <Skeleton active />
       </div>
     );
   }
@@ -72,7 +77,7 @@ const PopularPosts = () => {
   return (
     <div className="md:col-span-9 col-span-12">
       <div className="grid grid-cols-12 gap-4">
-        {/* Bài viết chính */}
+        {/* Main Post */}
         <div className="md:col-span-8 col-span-12">
           <img
             src={getFullImagePath(mainPost.image)}
@@ -81,20 +86,24 @@ const PopularPosts = () => {
           />
         </div>
         <div className="md:col-span-4 col-span-12">
-          <h2 className="md:text-2xl text-xl font-semibold">
+          <Link
+            to={`/posts/${mainPost.slug}`}
+            className="md:text-2xl text-xl font-semibold"
+          >
             {mainPost.title}
-          </h2>
+          </Link>
           <span className="md:text-sm text-xs py-2 block">
             {mainPost.excerpt}
           </span>
-          <div className="flex items-center gap-2 text-gray-400">
+          {/* <div className="flex items-center gap-2 text-gray-400">
             <FaMessage className="size-3" />
-            <span className="text-xs">{mainPost.views}</span>
-          </div>
+            <span className="text-sm">
+              {commentCounts[String(mainPost.id)] ?? 0} Comments
+            </span>
+          </div> */}
         </div>
       </div>
 
-      {/* Bài viết phụ */}
       <div className="border-t mt-6 pt-3 grid grid-cols-12 gap-5">
         {otherPosts.map((post, index) => (
           <div
